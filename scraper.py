@@ -354,12 +354,19 @@ def main():
     parser.add_argument("--category", type=str, default=None, help="Scrape only from this category URL or match name")
     parser.add_argument("--delay", type=float, default=1.5, help="Delay in seconds between requests to avoid bans")
     parser.add_argument("--db", type=str, default="startech.db", help="SQLite database file path")
+    parser.add_argument("--timeout", type=int, default=0, help="Max execution time in seconds (0 for no limit)")
+    parser.add_argument("--skip-existing", type=bool, default=True, help="Skip scraping details for URLs already in DB")
     args = parser.parse_args()
     
     print("[*] Starting Star Tech Bangladesh Web Scraper...")
     print(f"[*] Target DB: {args.db}")
     print(f"[*] Product Limit: {args.limit if args.limit > 0 else 'Unlimited'}")
     print(f"[*] Delay between requests: {args.delay} seconds")
+    print(f"[*] Timeout: {args.timeout} seconds" if args.timeout > 0 else "[*] Timeout: None")
+    print(f"[*] Skip existing products: {args.skip_existing}")
+    
+    # Track start time for timeout
+    start_time = time.time()
     
     # Initialize DB
     conn = init_db(args.db)
@@ -396,11 +403,16 @@ def main():
     for cat in categories:
         if args.limit > 0 and scraped_count >= args.limit:
             break
+        if args.timeout and (time.time() - start_time) > args.timeout:
+            break
             
         print(f"\n[*] Processing category: {cat['name']} ({cat['url']})")
         page = 1
         
         while args.limit <= 0 or scraped_count < args.limit:
+            if args.timeout and (time.time() - start_time) > args.timeout:
+                break
+                
             # Build paginated URL
             paginated_url = cat["url"]
             if "?" in paginated_url:
@@ -445,7 +457,17 @@ def main():
             for p_url in product_urls:
                 if args.limit > 0 and scraped_count >= args.limit:
                     break
+                if args.timeout and (time.time() - start_time) > args.timeout:
+                    print(f"[!] Timeout of {args.timeout} seconds reached. Stopping scraper.")
+                    break
                     
+                if args.skip_existing:
+                    db_cursor = conn.cursor()
+                    db_cursor.execute("SELECT id FROM products WHERE url = ?", (p_url,))
+                    if db_cursor.fetchone():
+                        print(f"[*] Skipping already scraped product: {p_url}")
+                        continue
+                        
                 # Small courtesy delay
                 time.sleep(args.delay)
                 

@@ -3,6 +3,9 @@ name: Star Tech Scraper
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   scrape:
     runs-on: ubuntu-latest
@@ -23,7 +26,18 @@ jobs:
 
       - name: Run Scraper
         run: |
-          python scraper.py --limit 0 --delay 1.2
+          # Set timeout to 5 hours (18000 seconds) so it exits cleanly before the 6-hour limit
+          python scraper.py --limit 0 --delay 1.2 --timeout 18000
+
+      - name: Commit and Push Progress
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git add startech.db pics/
+          git commit -m "Save scraping progress from cloud runner [skip ci]" || echo "No changes to commit"
+          git push origin main
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Package Scraped Data
         run: |
