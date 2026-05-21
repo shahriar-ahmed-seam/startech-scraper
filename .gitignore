@@ -7,3 +7,6 @@ __pycache__/
 .DS_Store
 .idea/
 .vscode/
+*.db-journal
+*.db-shm
+*.db-wal
