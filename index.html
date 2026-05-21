@@ -1075,6 +1075,98 @@
         }
 
         let loadedStatsSignature = "";
+        let categoryTree = [];
+
+        // Fetch category tree
+        async function fetchCategoryTree() {
+            try {
+                const response = await fetch("/api/categories");
+                if (response.ok) {
+                    const data = await response.json();
+                    categoryTree = data.tree || [];
+                    if (window._latestStats) {
+                        updateCategoryDropdowns(window._latestStats);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch category tree:", err);
+            }
+        }
+
+        // Rebuild and filter category dropdowns dynamically (cascading)
+        function updateCategoryDropdowns(stats) {
+            const curMain = mainCategoryFilter.value;
+            const curSub = subCategoryFilter.value;
+            const curSubSub = subSubCategoryFilter.value;
+
+            // 1. Rebuild Main Category Dropdown
+            mainCategoryFilter.innerHTML = '<option value="">All Main Categories</option>';
+            const mc = stats.main_categories || {};
+            
+            // Rebuild using the category tree to preserve site structure / order
+            const mainNodes = categoryTree.length > 0 ? categoryTree : Object.keys(mc).map(name => ({ name }));
+            mainNodes.forEach(node => {
+                const count = mc[node.name] || 0;
+                if (count > 0 || categoryTree.length > 0) {
+                    const option = document.createElement("option");
+                    option.value = node.name;
+                    option.innerText = `${node.name} (${count})`;
+                    mainCategoryFilter.appendChild(option);
+                }
+            });
+            mainCategoryFilter.value = curMain;
+
+            // 2. Rebuild Sub Category Dropdown
+            if (curMain && categoryTree.length > 0) {
+                const mainNode = categoryTree.find(n => n.name === curMain);
+                if (mainNode && mainNode.children && mainNode.children.length > 0) {
+                    subCategoryFilter.innerHTML = '<option value="">All Sub Categories</option>';
+                    mainNode.children.forEach(subNode => {
+                        const count = stats.sub_categories[subNode.name] || 0;
+                        const option = document.createElement("option");
+                        option.value = subNode.name;
+                        option.innerText = `${subNode.name} (${count})`;
+                        subCategoryFilter.appendChild(option);
+                    });
+                    subCategoryFilter.value = curSub;
+                    subCategoryFilter.disabled = false;
+                } else {
+                    subCategoryFilter.innerHTML = '<option value="">No Sub Categories</option>';
+                    subCategoryFilter.value = "";
+                    subCategoryFilter.disabled = true;
+                }
+            } else {
+                subCategoryFilter.innerHTML = '<option value="">Sub Category</option>';
+                subCategoryFilter.value = "";
+                subCategoryFilter.disabled = true;
+            }
+
+            // 3. Rebuild Sub-Sub Category Dropdown
+            if (curMain && curSub && categoryTree.length > 0) {
+                const mainNode = categoryTree.find(n => n.name === curMain);
+                const subNode = mainNode ? mainNode.children.find(n => n.name === curSub) : null;
+                if (subNode && subNode.children && subNode.children.length > 0) {
+                    subSubCategoryFilter.innerHTML = '<option value="">All Sub-Sub Categories</option>';
+                    subNode.children.forEach(subSubNode => {
+                        const count = stats.sub_sub_categories[subSubNode.name] || 0;
+                        const option = document.createElement("option");
+                        option.value = subSubNode.name;
+                        option.innerText = `${subSubNode.name} (${count})`;
+                        subSubCategoryFilter.appendChild(option);
+                    });
+                    subSubCategoryFilter.value = curSubSub;
+                    subSubCategoryFilter.disabled = false;
+                } else {
+                    subSubCategoryFilter.innerHTML = '<option value="">No Sub-Sub Categories</option>';
+                    subSubCategoryFilter.value = "";
+                    subSubCategoryFilter.disabled = true;
+                }
+            } else {
+                subSubCategoryFilter.innerHTML = '<option value="">Sub-Sub Category</option>';
+                subSubCategoryFilter.value = "";
+                subSubCategoryFilter.disabled = true;
+            }
+        }
 
         // Fetch stats and update live status
         async function fetchStats() {
@@ -1084,7 +1176,7 @@
                     const stats = await response.json();
                     liveCount.innerText = stats.total_products;
 
-                    // Store stats globally for featured categories
+                    // Store stats globally
                     window._latestStats = stats;
                     renderFeaturedCategories(stats);
                     
@@ -1097,41 +1189,11 @@
                     if (signature !== loadedStatsSignature) {
                         loadedStatsSignature = signature;
 
-                        const curMain = mainCategoryFilter.value;
-                        const curSub = subCategoryFilter.value;
-                        const curSubSub = subSubCategoryFilter.value;
                         const currentBrand = brandFilter.value;
                         const currentStatus = statusFilter.value;
 
-                        // Rebuild Main Category dropdown
-                        mainCategoryFilter.innerHTML = '<option value="">All Main Categories</option>';
-                        for (const cat in mc) {
-                            const option = document.createElement("option");
-                            option.value = cat;
-                            option.innerText = `${cat} (${mc[cat]})`;
-                            mainCategoryFilter.appendChild(option);
-                        }
-                        mainCategoryFilter.value = curMain;
-
-                        // Rebuild Sub Category dropdown
-                        subCategoryFilter.innerHTML = '<option value="">All Sub Categories</option>';
-                        for (const cat in sc) {
-                            const option = document.createElement("option");
-                            option.value = cat;
-                            option.innerText = `${cat} (${sc[cat]})`;
-                            subCategoryFilter.appendChild(option);
-                        }
-                        subCategoryFilter.value = curSub;
-
-                        // Rebuild Sub-Sub Category dropdown
-                        subSubCategoryFilter.innerHTML = '<option value="">All Sub-Sub Categories</option>';
-                        for (const cat in ssc) {
-                            const option = document.createElement("option");
-                            option.value = cat;
-                            option.innerText = `${cat} (${ssc[cat]})`;
-                            subSubCategoryFilter.appendChild(option);
-                        }
-                        subSubCategoryFilter.value = curSubSub;
+                        // Rebuild Category dropdowns cascadingly
+                        updateCategoryDropdowns(stats);
 
                         // Rebuild Brand dropdown
                         brandFilter.innerHTML = '<option value="">All Brands</option>';
@@ -1366,17 +1428,19 @@
                             activeMainCategory = "";
                             activeSubCategory = "";
                             activeSubSubCategory = "";
-                            mainCategoryFilter.value = "";
-                            subCategoryFilter.value = "";
-                            subSubCategoryFilter.value = "";
                         } else {
                             activeMainCategory = cat.mainCat || "";
                             activeSubCategory = cat.subCat || "";
                             activeSubSubCategory = "";
-                            mainCategoryFilter.value = cat.mainCat || "";
-                            subCategoryFilter.value = cat.subCat || "";
-                            subSubCategoryFilter.value = "";
                         }
+                        
+                        // Sync select inputs
+                        mainCategoryFilter.value = activeMainCategory;
+                        updateCategoryDropdowns(window._latestStats || stats);
+                        subCategoryFilter.value = activeSubCategory;
+                        updateCategoryDropdowns(window._latestStats || stats);
+                        subSubCategoryFilter.value = activeSubSubCategory;
+
                         currentPage = 1;
                         fetchProducts();
                         updateFeaturedHighlight();
@@ -1439,8 +1503,11 @@
             activeMainCategory = e.target.value;
             activeSubCategory = "";
             activeSubSubCategory = "";
-            subCategoryFilter.value = "";
-            subSubCategoryFilter.value = "";
+            
+            if (window._latestStats) {
+                updateCategoryDropdowns(window._latestStats);
+            }
+            
             currentPage = 1;
             fetchProducts();
             updateFeaturedHighlight();
@@ -1449,7 +1516,11 @@
         subCategoryFilter.onchange = (e) => {
             activeSubCategory = e.target.value;
             activeSubSubCategory = "";
-            subSubCategoryFilter.value = "";
+            
+            if (window._latestStats) {
+                updateCategoryDropdowns(window._latestStats);
+            }
+            
             currentPage = 1;
             fetchProducts();
             updateFeaturedHighlight();
@@ -1506,8 +1577,9 @@
         maxPriceInput.oninput = handlePriceInput;
 
         // Initialize dashboard app
-        function init() {
-            fetchStats();
+        async function init() {
+            await fetchCategoryTree();
+            await fetchStats();
             fetchProducts();
             
             // Poll for fresh counts and statistics every 5 seconds (keeps it updated while scraper works)
