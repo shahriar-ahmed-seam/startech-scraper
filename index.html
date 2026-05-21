@@ -1,0 +1,1145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Star Tech Catalog Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface-color: rgba(30, 41, 59, 0.7);
+            --surface-border: rgba(255, 255, 255, 0.08);
+            --primary: #06b6d4;
+            --primary-glow: rgba(6, 182, 212, 0.3);
+            --accent: #a855f7;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --font-display: 'Outfit', sans-serif;
+            --font-body: 'Plus Jakarta Sans', sans-serif;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-body);
+            min-height: 100vh;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(99, 102, 241, 0.05) 0%, transparent 40%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.05) 0%, transparent 40%);
+            background-attachment: fixed;
+        }
+
+        /* Scrollbar customization */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+
+        /* Container Layout */
+        header {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--surface-border);
+            padding: 1.25rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.025em;
+            background: linear-gradient(135deg, #22d3ee 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .logo i {
+            -webkit-text-fill-color: initial;
+            background: linear-gradient(135deg, #22d3ee 0%, #a855f7 100%);
+            padding: 0.5rem;
+            border-radius: 12px;
+            color: #000;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Live Counter Badge */
+        .live-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(6, 182, 212, 0.1);
+            border: 1px solid rgba(6, 182, 212, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--primary);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+
+        .live-pulse {
+            width: 8px;
+            height: 8px;
+            background: var(--primary);
+            border-radius: 50%;
+            box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+            animation: pulse 1.6s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 8px rgba(6, 182, 212, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(6, 182, 212, 0);
+            }
+        }
+
+        main {
+            max-width: 1400px;
+            margin: 2rem auto;
+            padding: 0 1.5rem;
+        }
+
+        /* Filters Section */
+        .filter-bar {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            backdrop-filter: blur(8px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+        }
+
+        .filter-row-top {
+            display: grid;
+            grid-template-columns: 3fr 1fr;
+            gap: 1rem;
+        }
+
+        .filter-row-bottom {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            align-items: center;
+        }
+
+        @media (max-width: 768px) {
+            .filter-row-top {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .search-box {
+            position: relative;
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 0.85rem 1rem 0.85rem 2.75rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            transition: var(--transition);
+        }
+
+        .search-box input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .select-wrapper select {
+            width: 100%;
+            padding: 0.85rem 1rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.95rem;
+            outline: none;
+            cursor: pointer;
+            appearance: none;
+            -webkit-appearance: none;
+            transition: var(--transition);
+        }
+
+        .select-wrapper {
+            position: relative;
+        }
+
+        .select-wrapper::after {
+            content: "\f078";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            font-size: 0.8rem;
+            position: absolute;
+            right: 1.25rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            pointer-events: none;
+        }
+
+        .select-wrapper select:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px var(--primary-glow);
+        }
+
+        .price-range-group {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            background: rgba(15, 23, 42, 0.5);
+            border: 1px solid var(--surface-border);
+            border-radius: 12px;
+            padding: 0 0.75rem;
+            height: 46px;
+        }
+
+        .price-range-group input {
+            width: 100%;
+            background: transparent;
+            border: none;
+            color: var(--text-main);
+            font-family: var(--font-body);
+            font-size: 0.9rem;
+            outline: none;
+            height: 100%;
+        }
+
+        .price-range-group span {
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+
+        .price-range-group input:focus {
+            color: var(--primary);
+        }
+
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            border-radius: 20px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: rgba(6, 182, 212, 0.4);
+            box-shadow: 0 15px 30px -10px rgba(6, 182, 212, 0.15);
+        }
+
+        .card-img-holder {
+            position: relative;
+            padding-top: 75%;
+            background: rgba(15, 23, 42, 0.3);
+            border-bottom: 1px solid var(--surface-border);
+            overflow: hidden;
+        }
+
+        .card-img-holder img {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            transition: var(--transition);
+        }
+
+        .product-card:hover .card-img-holder img {
+            transform: translate(-50%, -50%) scale(1.05);
+        }
+
+        /* Status Badge on card */
+        .status-badge {
+            position: absolute;
+            top: 0.75rem;
+            right: 0.75rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            backdrop-filter: blur(4px);
+        }
+
+        .status-in-stock {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .status-out-stock {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-upcoming {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        .card-info {
+            padding: 1.25rem;
+            display: flex;
+            flex-direction: column;
+            flex-grow: 1;
+        }
+
+        .card-brand {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            margin-bottom: 0.25rem;
+        }
+
+        .card-title {
+            font-family: var(--font-display);
+            font-weight: 600;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            color: var(--text-main);
+            margin-bottom: 0.75rem;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            height: 2.6rem;
+        }
+
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 0.75rem;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+            padding-bottom: 0.5rem;
+        }
+
+        .card-price-row {
+            display: flex;
+            align-items: baseline;
+            gap: 0.5rem;
+            margin-top: auto;
+        }
+
+        .price-curr {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text-main);
+            font-family: var(--font-display);
+        }
+
+        .price-old {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-decoration: line-through;
+        }
+
+        /* Pagination & Footer */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 1rem;
+            margin: 3rem 0;
+        }
+
+        .btn-page {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            color: var(--text-main);
+            padding: 0.75rem 1.25rem;
+            border-radius: 12px;
+            font-family: var(--font-body);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-page:hover:not(:disabled) {
+            border-color: var(--primary);
+            color: var(--primary);
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.2);
+        }
+
+        .btn-page:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        #page-indicator {
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Overlay Modal */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.8);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+        }
+
+        .modal.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-card {
+            background: #1e293b;
+            border: 1px solid var(--surface-border);
+            border-radius: 24px;
+            width: 100%;
+            max-width: 900px;
+            max-height: 85vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transform: scale(0.95);
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal.open .modal-card {
+            transform: scale(1);
+        }
+
+        .modal-header {
+            padding: 1.5rem 2rem;
+            border-bottom: 1px solid var(--surface-border);
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1.5rem;
+        }
+
+        .modal-title-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .modal-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.25rem;
+            color: var(--text-main);
+        }
+
+        .modal-category-badge {
+            align-self: flex-start;
+            font-size: 0.75rem;
+            font-weight: 700;
+            background: rgba(168, 85, 247, 0.15);
+            color: #d8b4fe;
+            border: 1px solid rgba(168, 85, 247, 0.3);
+            padding: 0.25rem 0.75rem;
+            border-radius: 50px;
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.05);
+            border: none;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            color: var(--text-muted);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .btn-close:hover {
+            background: var(--danger);
+            color: white;
+        }
+
+        .modal-body {
+            padding: 2rem;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+        }
+
+        @media (max-width: 768px) {
+            .modal-body {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-preview {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .modal-img-container {
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--surface-border);
+            border-radius: 16px;
+            width: 100%;
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .modal-info-pills {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .info-pill {
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--surface-border);
+            padding: 0.75rem 1rem;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.85rem;
+        }
+
+        .info-pill span:first-child {
+            color: var(--text-muted);
+            font-weight: 500;
+        }
+
+        .info-pill span:last-child {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+
+        .modal-specs {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .spec-section-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--primary);
+            border-left: 3px solid var(--primary);
+            padding-left: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .spec-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+            border: 1px solid var(--surface-border);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .spec-table tr {
+            border-bottom: 1px solid var(--surface-border);
+        }
+
+        .spec-table tr:last-child {
+            border-bottom: none;
+        }
+
+        .spec-table td {
+            padding: 0.75rem 1rem;
+        }
+
+        .spec-name {
+            width: 35%;
+            font-weight: 600;
+            color: var(--text-muted);
+            background: rgba(15, 23, 42, 0.2);
+        }
+
+        .spec-value {
+            color: var(--text-main);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+            grid-column: 1 / -1;
+            font-size: 1.1rem;
+        }
+        
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: rgba(255, 255, 255, 0.1);
+            display: block;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-content">
+            <div class="logo">
+                <i class="fa-solid fa-microchip"></i>
+                Star Tech Catalog
+            </div>
+            <div class="live-status">
+                <div class="live-pulse"></div>
+                Live Database: <span id="live-count">0</span> items scraped
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- Filter and Search Bar -->
+        <section class="filter-bar">
+            <div class="filter-row-top">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="search-input" placeholder="Search by product name, brand, or code...">
+                </div>
+                <div class="select-wrapper">
+                    <select id="sort-order">
+                        <option value="recent">Recently Scraped</option>
+                        <option value="price-low">Price: Low to High</option>
+                        <option value="price-high">Price: High to Low</option>
+                        <option value="name-asc">Name: A to Z</option>
+                        <option value="name-desc">Name: Z to A</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="filter-row-bottom">
+                <div class="select-wrapper">
+                    <select id="category-filter">
+                        <option value="">All Categories</option>
+                    </select>
+                </div>
+                
+                <div class="select-wrapper">
+                    <select id="brand-filter">
+                        <option value="">All Brands</option>
+                    </select>
+                </div>
+
+                <div class="select-wrapper">
+                    <select id="status-filter">
+                        <option value="">All Statuses</option>
+                    </select>
+                </div>
+
+                <div class="price-range-group">
+                    <input type="number" id="min-price-input" placeholder="Min ৳">
+                    <span>to</span>
+                    <input type="number" id="max-price-input" placeholder="Max ৳">
+                </div>
+            </div>
+        </section>
+
+        <!-- Product Cards Grid -->
+        <section class="products-grid" id="products-container">
+            <!-- Dynamic products go here -->
+        </section>
+
+        <!-- Pagination -->
+        <div class="pagination-container">
+            <button class="btn-page" id="btn-prev" disabled>
+                <i class="fa-solid fa-arrow-left"></i> Previous
+            </button>
+            <span id="page-indicator">Page 1 of 1</span>
+            <button class="btn-page" id="btn-next" disabled>
+                Next <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </div>
+    </main>
+
+    <!-- Detail Specification Modal -->
+    <div class="modal" id="detail-modal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-category-badge" id="modal-category">Category</span>
+                    <h2 class="modal-title" id="modal-title">Product Name</h2>
+                </div>
+                <button class="btn-close" id="modal-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="modal-preview">
+                    <div class="modal-img-container">
+                        <img id="modal-image" src="" alt="Product Image">
+                    </div>
+                    <div class="modal-info-pills">
+                        <div class="info-pill">
+                            <span>Price</span>
+                            <span id="modal-price" style="color: var(--primary); font-size: 1.1rem;">-</span>
+                        </div>
+                        <div class="info-pill">
+                            <span>Status</span>
+                            <span id="modal-status">-</span>
+                        </div>
+                        <div class="info-pill">
+                            <span>Brand</span>
+                            <span id="modal-brand">-</span>
+                        </div>
+                        <div class="info-pill">
+                            <span>Product Code</span>
+                            <span id="modal-code">-</span>
+                        </div>
+                        <div class="info-pill">
+                            <span>Source Page</span>
+                            <span><a id="modal-source" href="#" target="_blank" style="color: var(--primary); text-decoration: none;">View Original <i class="fa-solid fa-up-right-from-square" style="font-size: 0.75rem;"></i></a></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-specs" id="modal-specs-container">
+                    <!-- Dynamic Specifications go here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // State variables
+        let currentPage = 1;
+        const itemsPerPage = 24;
+        let activeCategory = "";
+        let activeBrand = "";
+        let activeStatus = "";
+        let minPrice = "";
+        let maxPrice = "";
+        let searchQuery = "";
+        let sortVal = "recent";
+
+        // DOM elements
+        const productsContainer = document.getElementById("products-container");
+        const categoryFilter = document.getElementById("category-filter");
+        const brandFilter = document.getElementById("brand-filter");
+        const statusFilter = document.getElementById("status-filter");
+        const minPriceInput = document.getElementById("min-price-input");
+        const maxPriceInput = document.getElementById("max-price-input");
+        const searchInput = document.getElementById("search-input");
+        const sortOrder = document.getElementById("sort-order");
+        const liveCount = document.getElementById("live-count");
+        
+        const btnPrev = document.getElementById("btn-prev");
+        const btnNext = document.getElementById("btn-next");
+        const pageIndicator = document.getElementById("page-indicator");
+        
+        const detailModal = document.getElementById("detail-modal");
+        const modalClose = document.getElementById("modal-close");
+
+        // Format currency helper
+        function formatPrice(val) {
+            if (!val) return "Call for Price";
+            return val.toLocaleString("en-US") + " ৳";
+        }
+
+        let loadedStatsSignature = "";
+
+        // Fetch stats and update live status
+        async function fetchStats() {
+            try {
+                const response = await fetch("/api/stats");
+                if (response.ok) {
+                    const stats = await response.json();
+                    liveCount.innerText = stats.total_products;
+                    
+                    const signature = `${Object.keys(stats.categories).length}-${Object.keys(stats.brands).length}-${Object.keys(stats.statuses).length}`;
+                    
+                    if (signature !== loadedStatsSignature) {
+                        loadedStatsSignature = signature;
+                        
+                        // Keep track of currently selected values
+                        const currentCat = categoryFilter.value;
+                        const currentBrand = brandFilter.value;
+                        const currentStatus = statusFilter.value;
+
+                        // Rebuild Category dropdown
+                        categoryFilter.innerHTML = '<option value="">All Categories</option>';
+                        for (const cat in stats.categories) {
+                            const option = document.createElement("option");
+                            option.value = cat;
+                            option.innerText = `${cat} (${stats.categories[cat]})`;
+                            categoryFilter.appendChild(option);
+                        }
+                        categoryFilter.value = currentCat;
+
+                        // Rebuild Brand dropdown
+                        brandFilter.innerHTML = '<option value="">All Brands</option>';
+                        for (const brand in stats.brands) {
+                            const option = document.createElement("option");
+                            option.value = brand;
+                            option.innerText = `${brand} (${stats.brands[brand]})`;
+                            brandFilter.appendChild(option);
+                        }
+                        brandFilter.value = currentBrand;
+
+                        // Rebuild Status dropdown
+                        statusFilter.innerHTML = '<option value="">All Statuses</option>';
+                        for (const status in stats.statuses) {
+                            const option = document.createElement("option");
+                            option.value = status;
+                            option.innerText = `${status} (${stats.statuses[status]})`;
+                            statusFilter.appendChild(option);
+                        }
+                        statusFilter.value = currentStatus;
+                    }
+
+                    // Update placeholders
+                    if (stats.min_price !== undefined && !minPriceInput.value) {
+                        minPriceInput.placeholder = `Min (৳${stats.min_price})`;
+                    }
+                    if (stats.max_price !== undefined && !maxPriceInput.value) {
+                        maxPriceInput.placeholder = `Max (৳${stats.max_price})`;
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch stats:", err);
+            }
+        }
+
+        // Fetch and render products
+        async function fetchProducts() {
+            try {
+                let url = `/api/products?page=${currentPage}&limit=${itemsPerPage}`;
+                if (activeCategory) url += `&category=${encodeURIComponent(activeCategory)}`;
+                if (activeBrand) url += `&brand=${encodeURIComponent(activeBrand)}`;
+                if (activeStatus) url += `&status=${encodeURIComponent(activeStatus)}`;
+                if (minPrice) url += `&min_price=${encodeURIComponent(minPrice)}`;
+                if (maxPrice) url += `&max_price=${encodeURIComponent(maxPrice)}`;
+                url += `&sort=${encodeURIComponent(sortVal)}`;
+                if (searchQuery) url += `&search=${encodeURIComponent(searchQuery)}`;
+                
+                const response = await fetch(url);
+                if (response.ok) {
+                    const data = await response.json();
+                    renderProducts(data.products);
+                    
+                    // Update pagination buttons
+                    const totalPages = Math.max(1, Math.ceil(data.total / itemsPerPage));
+                    pageIndicator.innerText = `Page ${currentPage} of ${totalPages}`;
+                    
+                    btnPrev.disabled = currentPage === 1;
+                    btnNext.disabled = !data.has_more;
+                }
+            } catch (err) {
+                console.error("Failed to fetch products:", err);
+                productsContainer.innerHTML = `<div class="no-data"><i class="fa-solid fa-triangle-exclamation"></i>Failed to fetch catalog. Make sure the backend server is running.</div>`;
+            }
+        }
+
+        // Render products list in grid
+        function renderProducts(products) {
+            productsContainer.innerHTML = "";
+            if (!products || products.length === 0) {
+                productsContainer.innerHTML = `<div class="no-data"><i class="fa-solid fa-box-open"></i>No products found matching the criteria.</div>`;
+                return;
+            }
+
+            products.forEach(p => {
+                // Determine status badge class
+                let statusClass = "status-in-stock";
+                if (p.status && p.status.toLowerCase().includes("out")) {
+                    statusClass = "status-out-stock";
+                } else if (p.status && p.status.toLowerCase().includes("coming")) {
+                    statusClass = "status-upcoming";
+                }
+
+                const card = document.createElement("div");
+                card.className = "product-card";
+                card.onclick = () => showProductDetails(p.id);
+
+                const defaultImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='1.5'><rect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'/><line x1='7' y1='2' x2='7' y2='22'/><line x1='17' y1='2' x2='17' y2='22'/><line x1='2' y1='12' x2='22' y2='12'/></svg>";
+                const imgPath = p.image_path ? "/" + p.image_path.replace(/\\/g, "/") : defaultImg;
+
+                card.innerHTML = `
+                    <div class="card-img-holder">
+                        <img src="${imgPath}" alt="${p.name}" onerror="this.src='${defaultImg}'">
+                        <span class="status-badge ${statusClass}">${p.status || 'Unknown'}</span>
+                    </div>
+                    <div class="card-info">
+                        <span class="card-brand">${p.brand || 'Generic'}</span>
+                        <h3 class="card-title">${p.name}</h3>
+                        <div class="card-meta">
+                            <span>Code: ${p.product_code || 'N/A'}</span>
+                            <span>${p.category || 'Item'}</span>
+                        </div>
+                        <div class="card-price-row">
+                            <span class="price-curr">${formatPrice(p.price)}</span>
+                            ${p.old_price ? `<span class="price-old">${formatPrice(p.old_price)}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+                productsContainer.appendChild(card);
+            });
+        }
+
+        // Show product specs modal details
+        async function showProductDetails(productId) {
+            try {
+                const response = await fetch(`/api/product/${productId}`);
+                if (response.ok) {
+                    const p = await response.json();
+                    
+                    document.getElementById("modal-title").innerText = p.name;
+                    document.getElementById("modal-category").innerText = p.category || "Item";
+                    
+                    const defaultImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='1.5'><rect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'/><line x1='7' y1='2' x2='7' y2='22'/><line x1='17' y1='2' x2='17' y2='22'/><line x1='2' y1='12' x2='22' y2='12'/></svg>";
+                    const imgPath = p.image_path ? "/" + p.image_path.replace(/\\/g, "/") : defaultImg;
+                    
+                    document.getElementById("modal-image").src = imgPath;
+                    document.getElementById("modal-image").onerror = function() { this.src = defaultImg; };
+                    
+                    document.getElementById("modal-price").innerText = formatPrice(p.price);
+                    document.getElementById("modal-status").innerText = p.status || "Unknown";
+                    document.getElementById("modal-brand").innerText = p.brand || "N/A";
+                    document.getElementById("modal-code").innerText = p.product_code || "N/A";
+                    document.getElementById("modal-source").href = p.url;
+
+                    // Render specifications
+                    const specsContainer = document.getElementById("modal-specs-container");
+                    specsContainer.innerHTML = "";
+
+                    const specGroups = Object.keys(p.specs);
+                    if (specGroups.length === 0) {
+                        specsContainer.innerHTML = `<div class="no-data">No technical specifications listed.</div>`;
+                    } else {
+                        specGroups.forEach(group => {
+                            const groupDiv = document.createElement("div");
+                            groupDiv.className = "spec-section";
+                            
+                            const groupTitle = document.createElement("h4");
+                            groupTitle.className = "spec-section-title";
+                            groupTitle.innerText = group;
+                            groupDiv.appendChild(groupTitle);
+                            
+                            const table = document.createElement("table");
+                            table.className = "spec-table";
+                            
+                            p.specs[group].forEach(spec => {
+                                const tr = document.createElement("tr");
+                                tr.innerHTML = `
+                                    <td class="spec-name">${spec.name}</td>
+                                    <td class="spec-value">${spec.value}</td>
+                                `;
+                                table.appendChild(tr);
+                            });
+                            
+                            groupDiv.appendChild(table);
+                            specsContainer.appendChild(groupDiv);
+                        });
+                    }
+
+                    detailModal.classList.add("open");
+                }
+            } catch (err) {
+                console.error("Failed to load product detail specs:", err);
+            }
+        }
+
+        // Close modal event
+        modalClose.onclick = () => detailModal.classList.remove("open");
+        window.onclick = (e) => {
+            if (e.target === detailModal) {
+                detailModal.classList.remove("open");
+            }
+        };
+
+        // Pagination event listeners
+        btnPrev.onclick = () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchProducts();
+            }
+        };
+
+        btnNext.onclick = () => {
+            currentPage++;
+            fetchProducts();
+        };
+
+        // Filter event listeners
+        categoryFilter.onchange = (e) => {
+            activeCategory = e.target.value;
+            currentPage = 1;
+            fetchProducts();
+        };
+
+        brandFilter.onchange = (e) => {
+            activeBrand = e.target.value;
+            currentPage = 1;
+            fetchProducts();
+        };
+
+        statusFilter.onchange = (e) => {
+            activeStatus = e.target.value;
+            currentPage = 1;
+            fetchProducts();
+        };
+
+        sortOrder.onchange = (e) => {
+            sortVal = e.target.value;
+            currentPage = 1;
+            fetchProducts();
+        };
+
+        // Debounced search query
+        let searchTimeout;
+        searchInput.oninput = (e) => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchQuery = e.target.value;
+                currentPage = 1;
+                fetchProducts();
+            }, 300);
+        };
+
+        // Debounced price range input
+        let priceTimeout;
+        const handlePriceInput = () => {
+            clearTimeout(priceTimeout);
+            priceTimeout = setTimeout(() => {
+                minPrice = minPriceInput.value;
+                maxPrice = maxPriceInput.value;
+                currentPage = 1;
+                fetchProducts();
+            }, 400);
+        };
+
+        minPriceInput.oninput = handlePriceInput;
+        maxPriceInput.oninput = handlePriceInput;
+
+        // Initialize dashboard app
+        function init() {
+            fetchStats();
+            fetchProducts();
+            
+            // Poll for fresh counts and statistics every 5 seconds (keeps it updated while scraper works)
+            setInterval(fetchStats, 5000);
+        }
+
+        init();
+    </script>
+</body>
+</html>
