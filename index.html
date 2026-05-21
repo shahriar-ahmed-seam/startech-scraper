@@ -692,6 +692,141 @@
             color: rgba(255, 255, 255, 0.1);
             display: block;
         }
+
+        /* Featured Category Section */
+        .featured-section {
+            background: var(--surface-color);
+            border: 1px solid var(--surface-border);
+            backdrop-filter: blur(8px);
+            padding: 1.5rem;
+            border-radius: 20px;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px -10px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+
+        .featured-title-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .featured-title {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, #22d3ee 0%, #a855f7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.25rem;
+        }
+
+        .featured-subtitle {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .featured-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 1rem;
+        }
+
+        @media (max-width: 1200px) {
+            .featured-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .featured-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .featured-card {
+            background: rgba(15, 23, 42, 0.4);
+            border: 1px solid var(--surface-border);
+            border-radius: 14px;
+            padding: 1.25rem 0.75rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+            user-select: none;
+        }
+
+        .featured-card:hover {
+            transform: translateY(-3px);
+            border-color: var(--primary);
+            box-shadow: 0 8px 20px -8px var(--primary-glow);
+            background: rgba(15, 23, 42, 0.6);
+        }
+
+        .featured-card.active {
+            border-color: var(--primary);
+            background: rgba(6, 182, 212, 0.1);
+            box-shadow: 0 0 15px var(--primary-glow);
+        }
+
+        .featured-icon-wrapper {
+            font-size: 1.6rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .featured-card:hover .featured-icon-wrapper {
+            color: var(--primary);
+            transform: scale(1.1);
+        }
+
+        .featured-card.active .featured-icon-wrapper {
+            color: var(--primary);
+        }
+
+        .featured-label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-main);
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .featured-count-badge {
+            position: absolute;
+            top: 0.4rem;
+            right: 0.4rem;
+            font-size: 0.65rem;
+            font-weight: 700;
+            padding: 0.1rem 0.35rem;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid var(--surface-border);
+            transition: var(--transition);
+        }
+
+        .featured-card:hover .featured-count-badge {
+            background: rgba(6, 182, 212, 0.15);
+            color: var(--primary);
+            border-color: rgba(6, 182, 212, 0.3);
+        }
+
+        .featured-card.active .featured-count-badge {
+            background: var(--primary);
+            color: #000;
+            border-color: var(--primary);
+        }
+
+        .featured-count-badge.empty {
+            opacity: 0.4;
+        }
     </style>
 </head>
 <body>
@@ -710,6 +845,17 @@
     </header>
 
     <main>
+        <!-- Featured Category Grid -->
+        <section class="featured-section">
+            <div class="featured-title-group">
+                <h2 class="featured-title">Featured Category</h2>
+                <div class="featured-subtitle">Get Your Desired Product from Featured Category!</div>
+            </div>
+            <div class="featured-grid" id="featured-categories-grid">
+                <!-- Rendered dynamically via JS -->
+            </div>
+        </section>
+
         <!-- Filter and Search Bar -->
         <section class="filter-bar">
             <div class="filter-row-top">
@@ -730,11 +876,23 @@
             
             <div class="filter-row-bottom">
                 <div class="select-wrapper">
-                    <select id="category-filter">
-                        <option value="">All Categories</option>
+                    <select id="main-category-filter">
+                        <option value="">All Main Categories</option>
                     </select>
                 </div>
-                
+
+                <div class="select-wrapper">
+                    <select id="sub-category-filter" disabled>
+                        <option value="">Sub Category</option>
+                    </select>
+                </div>
+
+                <div class="select-wrapper">
+                    <select id="sub-sub-category-filter" disabled>
+                        <option value="">Sub-Sub Category</option>
+                    </select>
+                </div>
+
                 <div class="select-wrapper">
                     <select id="brand-filter">
                         <option value="">All Brands</option>
@@ -819,11 +977,70 @@
         </div>
     </div>
 
+    <!-- Scraper Instruction Modal -->
+    <div class="modal" id="scraper-info-modal">
+        <div class="modal-card" style="max-width: 550px;">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <span class="modal-category-badge" style="background: rgba(245, 158, 11, 0.15); color: #fbbf24; border-color: rgba(245, 158, 11, 0.3);">Data Not Found</span>
+                    <h2 class="modal-title" id="scraper-info-title">Category Not Scraped</h2>
+                </div>
+                <button class="btn-close" id="scraper-info-close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body" style="grid-template-columns: 1fr; padding: 1.5rem 2rem; gap: 1rem;">
+                <p style="color: var(--text-main); font-size: 0.95rem; line-height: 1.5;">
+                    The database currently has <strong>5,777 products</strong>, but they are focused on Desktops, Laptops, and Components.
+                </p>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.5;">
+                    Because the scraper processes the website navigation from left-to-right, the 5-hour timeout limit on GitHub Actions was reached before it could fetch other categories like appliances, phones, and gadgets.
+                </p>
+                
+                <div style="background: rgba(15, 23, 42, 0.4); border: 1px solid var(--surface-border); border-radius: 12px; padding: 1.25rem; margin-top: 0.5rem;">
+                    <span style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase; color: var(--primary); display: block; margin-bottom: 0.5rem;">How to scrape this category:</span>
+                    <code id="scraper-cmd-code" style="display: block; font-family: monospace; font-size: 0.85rem; color: #f8fafc; word-break: break-all; background: #090d16; padding: 0.75rem; border-radius: 6px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 0.75rem;">
+                        python scraper.py --category "https://www.startech.com.bd/..."
+                    </code>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; line-height: 1.4;">
+                        <strong>Local scrape:</strong> Run the command above in your terminal. It will scrape products and add them directly to your local database.
+                    </p>
+                    <p style="font-size: 0.8rem; color: var(--text-muted); line-height: 1.4;">
+                        <strong>Cloud scrape:</strong> Go to your GitHub Repository -> <strong>Actions</strong> tab -> Select <strong>Star Tech Scraper</strong> -> Click <strong>Run workflow</strong> and run the scraper for this category.
+                    </p>
+                </div>
+                
+                <div style="display: flex; gap: 1rem; margin-top: 1rem; justify-content: flex-end;">
+                    <a id="btn-scraper-visit" href="#" target="_blank" class="btn-page" style="text-decoration: none; font-size: 0.85rem; padding: 0.6rem 1.2rem;">
+                        Visit Star Tech Page <i class="fa-solid fa-up-right-from-square" style="font-size: 0.75rem;"></i>
+                    </a>
+                    <button class="btn-page" id="scraper-info-ok" style="background: var(--primary); color: #000; font-size: 0.85rem; padding: 0.6rem 1.4rem;">
+                        Got it
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Featured Categories — keyed to main_category for hierarchical filtering
+        const featuredCategories = [
+            { id: "ac", name: "AC", mainCat: "Appliance", subCat: "AC", icon: "fa-solid fa-wind", url: "https://www.startech.com.bd/air-conditioner" },
+            { id: "power-station", name: "Portable Power Station", mainCat: "Gadget", subCat: "Portable Power Station", icon: "fa-solid fa-charging-station", url: "https://www.startech.com.bd/gadget/portable-power-station" },
+            { id: "air-fryer", name: "Air Fryer", mainCat: "Appliance", subCat: "Air Fryer", icon: "fa-solid fa-fire-burner", url: "https://www.startech.com.bd/air-fryer" },
+            { id: "drone", name: "Drone", mainCat: "Gadget", subCat: "Drones", icon: "fa-solid fa-helicopter", url: "https://www.startech.com.bd/gadget/drone" },
+            { id: "gimbal", name: "Gimbal", mainCat: "Gadget", subCat: "Gimbal", icon: "fa-solid fa-camera-rotate", url: "https://www.startech.com.bd/gadget/gimbal" },
+            { id: "tablet-pc", name: "Table PC", mainCat: "Tablet PC", subCat: null, icon: "fa-solid fa-tablet-screen-button", url: "https://www.startech.com.bd/tablet-pc" },
+            { id: "tv", name: "TV", mainCat: "TV", subCat: null, icon: "fa-solid fa-tv", url: "https://www.startech.com.bd/television" },
+            { id: "fridge", name: "Fridge", mainCat: "Appliance", subCat: "Fridge", icon: "fa-solid fa-snowflake", url: "https://www.startech.com.bd/refrigerator" }
+        ];
+
         // State variables
         let currentPage = 1;
         const itemsPerPage = 24;
-        let activeCategory = "";
+        let activeMainCategory = "";
+        let activeSubCategory = "";
+        let activeSubSubCategory = "";
         let activeBrand = "";
         let activeStatus = "";
         let minPrice = "";
@@ -833,7 +1050,9 @@
 
         // DOM elements
         const productsContainer = document.getElementById("products-container");
-        const categoryFilter = document.getElementById("category-filter");
+        const mainCategoryFilter = document.getElementById("main-category-filter");
+        const subCategoryFilter = document.getElementById("sub-category-filter");
+        const subSubCategoryFilter = document.getElementById("sub-sub-category-filter");
         const brandFilter = document.getElementById("brand-filter");
         const statusFilter = document.getElementById("status-filter");
         const minPriceInput = document.getElementById("min-price-input");
@@ -864,26 +1083,55 @@
                 if (response.ok) {
                     const stats = await response.json();
                     liveCount.innerText = stats.total_products;
+
+                    // Store stats globally for featured categories
+                    window._latestStats = stats;
+                    renderFeaturedCategories(stats);
                     
-                    const signature = `${Object.keys(stats.categories).length}-${Object.keys(stats.brands).length}-${Object.keys(stats.statuses).length}`;
-                    
+                    const mc = stats.main_categories || {};
+                    const sc = stats.sub_categories || {};
+                    const ssc = stats.sub_sub_categories || {};
+                    const sigParts = [Object.keys(mc).length, Object.keys(sc).length, Object.keys(ssc).length, Object.keys(stats.brands).length, Object.keys(stats.statuses).length];
+                    const signature = sigParts.join("-");
+
                     if (signature !== loadedStatsSignature) {
                         loadedStatsSignature = signature;
-                        
-                        // Keep track of currently selected values
-                        const currentCat = categoryFilter.value;
+
+                        const curMain = mainCategoryFilter.value;
+                        const curSub = subCategoryFilter.value;
+                        const curSubSub = subSubCategoryFilter.value;
                         const currentBrand = brandFilter.value;
                         const currentStatus = statusFilter.value;
 
-                        // Rebuild Category dropdown
-                        categoryFilter.innerHTML = '<option value="">All Categories</option>';
-                        for (const cat in stats.categories) {
+                        // Rebuild Main Category dropdown
+                        mainCategoryFilter.innerHTML = '<option value="">All Main Categories</option>';
+                        for (const cat in mc) {
                             const option = document.createElement("option");
                             option.value = cat;
-                            option.innerText = `${cat} (${stats.categories[cat]})`;
-                            categoryFilter.appendChild(option);
+                            option.innerText = `${cat} (${mc[cat]})`;
+                            mainCategoryFilter.appendChild(option);
                         }
-                        categoryFilter.value = currentCat;
+                        mainCategoryFilter.value = curMain;
+
+                        // Rebuild Sub Category dropdown
+                        subCategoryFilter.innerHTML = '<option value="">All Sub Categories</option>';
+                        for (const cat in sc) {
+                            const option = document.createElement("option");
+                            option.value = cat;
+                            option.innerText = `${cat} (${sc[cat]})`;
+                            subCategoryFilter.appendChild(option);
+                        }
+                        subCategoryFilter.value = curSub;
+
+                        // Rebuild Sub-Sub Category dropdown
+                        subSubCategoryFilter.innerHTML = '<option value="">All Sub-Sub Categories</option>';
+                        for (const cat in ssc) {
+                            const option = document.createElement("option");
+                            option.value = cat;
+                            option.innerText = `${cat} (${ssc[cat]})`;
+                            subSubCategoryFilter.appendChild(option);
+                        }
+                        subSubCategoryFilter.value = curSubSub;
 
                         // Rebuild Brand dropdown
                         brandFilter.innerHTML = '<option value="">All Brands</option>';
@@ -923,7 +1171,9 @@
         async function fetchProducts() {
             try {
                 let url = `/api/products?page=${currentPage}&limit=${itemsPerPage}`;
-                if (activeCategory) url += `&category=${encodeURIComponent(activeCategory)}`;
+                if (activeMainCategory) url += `&main_category=${encodeURIComponent(activeMainCategory)}`;
+                if (activeSubCategory) url += `&sub_category=${encodeURIComponent(activeSubCategory)}`;
+                if (activeSubSubCategory) url += `&sub_sub_category=${encodeURIComponent(activeSubSubCategory)}`;
                 if (activeBrand) url += `&brand=${encodeURIComponent(activeBrand)}`;
                 if (activeStatus) url += `&status=${encodeURIComponent(activeStatus)}`;
                 if (minPrice) url += `&min_price=${encodeURIComponent(minPrice)}`;
@@ -973,6 +1223,8 @@
                 const defaultImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='1.5'><rect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'/><line x1='7' y1='2' x2='7' y2='22'/><line x1='17' y1='2' x2='17' y2='22'/><line x1='2' y1='12' x2='22' y2='12'/></svg>";
                 const imgPath = p.image_path ? "/" + p.image_path.replace(/\\/g, "/") : defaultImg;
 
+                const breadcrumb = [p.main_category, p.sub_category, p.sub_sub_category].filter(Boolean).join(' > ') || p.category || 'Item';
+
                 card.innerHTML = `
                     <div class="card-img-holder">
                         <img src="${imgPath}" alt="${p.name}" onerror="this.src='${defaultImg}'">
@@ -983,7 +1235,7 @@
                         <h3 class="card-title">${p.name}</h3>
                         <div class="card-meta">
                             <span>Code: ${p.product_code || 'N/A'}</span>
-                            <span>${p.category || 'Item'}</span>
+                            <span style="font-size: 0.7rem; opacity: 0.8;">${breadcrumb}</span>
                         </div>
                         <div class="card-price-row">
                             <span class="price-curr">${formatPrice(p.price)}</span>
@@ -1003,7 +1255,8 @@
                     const p = await response.json();
                     
                     document.getElementById("modal-title").innerText = p.name;
-                    document.getElementById("modal-category").innerText = p.category || "Item";
+                    const breadcrumbPath = p.breadcrumb_path || [p.main_category, p.sub_category, p.sub_sub_category].filter(Boolean).join(' > ') || p.category || 'Item';
+                    document.getElementById("modal-category").innerText = breadcrumbPath;
                     
                     const defaultImg = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 24 24' fill='none' stroke='%23334155' stroke-width='1.5'><rect x='2' y='2' width='20' height='20' rx='2.18' ry='2.18'/><line x1='7' y1='2' x2='7' y2='22'/><line x1='17' y1='2' x2='17' y2='22'/><line x1='2' y1='12' x2='22' y2='12'/></svg>";
                     const imgPath = p.image_path ? "/" + p.image_path.replace(/\\/g, "/") : defaultImg;
@@ -1060,11 +1313,113 @@
 
         // Close modal event
         modalClose.onclick = () => detailModal.classList.remove("open");
+        
+        // Scraper Modal close handlers
+        const scraperModal = document.getElementById("scraper-info-modal");
+        const scraperClose = document.getElementById("scraper-info-close");
+        const scraperOk = document.getElementById("scraper-info-ok");
+        const scraperVisit = document.getElementById("btn-scraper-visit");
+        
+        if (scraperClose) scraperClose.onclick = () => scraperModal.classList.remove("open");
+        if (scraperOk) scraperOk.onclick = () => scraperModal.classList.remove("open");
+
         window.onclick = (e) => {
             if (e.target === detailModal) {
                 detailModal.classList.remove("open");
+            } else if (e.target === scraperModal) {
+                scraperModal.classList.remove("open");
             }
         };
+
+        // Render Featured Categories Grid
+        function renderFeaturedCategories(stats) {
+            const grid = document.getElementById("featured-categories-grid");
+            if (!grid) return;
+            
+            grid.innerHTML = "";
+            const mc = stats.main_categories || {};
+            const sc = stats.sub_categories || {};
+
+            featuredCategories.forEach(cat => {
+                let totalCount = 0;
+                
+                // Check sub_category first, then main_category
+                if (cat.subCat && sc[cat.subCat]) {
+                    totalCount = sc[cat.subCat];
+                } else if (cat.mainCat && mc[cat.mainCat]) {
+                    totalCount = mc[cat.mainCat];
+                }
+                
+                const card = document.createElement("div");
+                card.className = "featured-card";
+                card.id = `feat-${cat.id}`;
+                
+                const isActive = (cat.subCat && activeSubCategory === cat.subCat) || 
+                                 (!cat.subCat && cat.mainCat && activeMainCategory === cat.mainCat);
+                if (isActive) {
+                    card.classList.add("active");
+                }
+                
+                card.onclick = () => {
+                    if (totalCount > 0) {
+                        if (isActive) {
+                            activeMainCategory = "";
+                            activeSubCategory = "";
+                            activeSubSubCategory = "";
+                            mainCategoryFilter.value = "";
+                            subCategoryFilter.value = "";
+                            subSubCategoryFilter.value = "";
+                        } else {
+                            activeMainCategory = cat.mainCat || "";
+                            activeSubCategory = cat.subCat || "";
+                            activeSubSubCategory = "";
+                            mainCategoryFilter.value = cat.mainCat || "";
+                            subCategoryFilter.value = cat.subCat || "";
+                            subSubCategoryFilter.value = "";
+                        }
+                        currentPage = 1;
+                        fetchProducts();
+                        updateFeaturedHighlight();
+                    } else {
+                        showScraperInfo(cat.name, cat.url);
+                    }
+                };
+                
+                const badgeClass = totalCount === 0 ? "featured-count-badge empty" : "featured-count-badge";
+                
+                card.innerHTML = `
+                    <span class="${badgeClass}">${totalCount}</span>
+                    <div class="featured-icon-wrapper">
+                        <i class="${cat.icon}"></i>
+                    </div>
+                    <span class="featured-label">${cat.name}</span>
+                `;
+                
+                grid.appendChild(card);
+            });
+        }
+        
+        function updateFeaturedHighlight() {
+            featuredCategories.forEach(cat => {
+                const card = document.getElementById(`feat-${cat.id}`);
+                if (!card) return;
+                
+                const isActive = (cat.subCat && activeSubCategory === cat.subCat) || 
+                                 (!cat.subCat && cat.mainCat && activeMainCategory === cat.mainCat);
+                if (isActive) {
+                    card.classList.add("active");
+                } else {
+                    card.classList.remove("active");
+                }
+            });
+        }
+
+        function showScraperInfo(catName, catUrl) {
+            document.getElementById("scraper-info-title").innerText = `${catName} Not Scraped`;
+            document.getElementById("scraper-cmd-code").innerText = `python scraper.py --limit 100 --category "${catUrl}"`;
+            scraperVisit.href = catUrl;
+            scraperModal.classList.add("open");
+        }
 
         // Pagination event listeners
         btnPrev.onclick = () => {
@@ -1079,9 +1434,29 @@
             fetchProducts();
         };
 
-        // Filter event listeners
-        categoryFilter.onchange = (e) => {
-            activeCategory = e.target.value;
+        // Filter event listeners — cascading category filters
+        mainCategoryFilter.onchange = (e) => {
+            activeMainCategory = e.target.value;
+            activeSubCategory = "";
+            activeSubSubCategory = "";
+            subCategoryFilter.value = "";
+            subSubCategoryFilter.value = "";
+            currentPage = 1;
+            fetchProducts();
+            updateFeaturedHighlight();
+        };
+
+        subCategoryFilter.onchange = (e) => {
+            activeSubCategory = e.target.value;
+            activeSubSubCategory = "";
+            subSubCategoryFilter.value = "";
+            currentPage = 1;
+            fetchProducts();
+            updateFeaturedHighlight();
+        };
+
+        subSubCategoryFilter.onchange = (e) => {
+            activeSubSubCategory = e.target.value;
             currentPage = 1;
             fetchProducts();
         };
