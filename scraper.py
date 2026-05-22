@@ -7,6 +7,7 @@ import urllib.parse
 import sqlite3
 import argparse
 import requests
+# pyrefly: ignore [missing-import]
 from bs4 import BeautifulSoup
 
 # Base website URL
